@@ -1,5 +1,32 @@
 let data = [];
+const filtArray = [];
 const jobList = document.querySelector(".joblist");
+const inputField = document.querySelector(".requirements");
+
+function addToFilter(item) {
+  if (filtArray.includes(item)) {
+    return;
+  } else {
+    filtArray.push(item);
+    console.log(filtArray);
+  }
+  let display = "";
+  filtArray.map((item) => {
+    display += `
+        <div class="frontend">
+          <button type="button" class="button">
+            <span class="button__text">${item}</span>
+            <span class="button__icon">
+              <i class="fa-solid fa-xmark"></i>
+            </span>
+          </button>
+        </div>
+      `;
+  });
+  inputField.innerHTML = display;
+  getData();
+}
+
 function getData() {
   fetch("./assets/js/data.json")
     .then((resp) => {
@@ -11,11 +38,13 @@ function getData() {
       data = res;
       console.log(data);
       data.forEach((item, id) => {
-        let languages = item.languages.map((items, id) => {
-          return `<button class="tag-units">${items}</button>`;
-        });
+        item.languages.unshift(item.level);
+        item.languages.unshift(item.role);
+        // let languages = item.languages.map((items, id) => {
+        //   return `<button class="tag-units">${items}</button>`;
+        // });
 
-        console.log(languages);
+        // console.log(languages);
         let render = "";
         render += ` <div class="joblisitng__card" >
         <article>
@@ -26,8 +55,12 @@ function getData() {
             <div class="company-info">
               <div class="job-header">
                 <div class="company-name">${item.company}</div>
-                <div class="New">NEW!</div>
-                <div class="Featured">FEATURED</div>
+                <div class="${item.new ? "New" : ""}">${
+          item.new ? "NEW" : ""
+        }</div>
+                <div class="${item.featured ? "Featured" : ""}">${
+          item.featured ? "FEATURED" : ""
+        }</div>
               </div>
               <h3 class="job-position">${item.position}</h3>
               <div class="job-footer">
@@ -45,7 +78,12 @@ function getData() {
           </div>
         </article>
         <div class="tag-list">
-          ${languages} 
+          ${item.languages
+            .map(
+              (items) =>
+                `<button class="tag-units" onclick="addToFilter('${items}')">${items}</button>`
+            )
+            .join(" ")}
         </div>
       </div>`;
         jobList.innerHTML += render;
